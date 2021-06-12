@@ -10,22 +10,17 @@ from datetime import datetime
 SCREEN_WIDTH = 1000
 SCREEN_HEIGHT = 500
 
-class MidiTeacher(arcade.Window):
+class GameView(arcade.View):
     """ Main application class. """
 
-    def __init__(self, width, height):
-        super().__init__(width, height)
+    def __init__(self):
+        super().__init__()
         self.played_notes = [0]*12
         self.notes = ['C', 'C#\nDb', 'D', 'D#\nEb', 'E', 'F', 'F#\nGb', 'G', 'G#\nAb', 'A', 'A#\nBb', 'B']
         self.intervals = ['1', '2m', '2', '3m', '3', '4', 'T', '5', '6m', '6', '7m', '7']
         self.formulas = {
             'min':['1', '3m', '5'],
-            'maj':['1', '3', '5'],
-            'min7':['1', '3m', '5', '7m'],
-            'maj7':['1', '3', '5', '7'],
-            '7':['1', '3', '5', '7m'],
-            'sus2':['1', '2', '5'],
-            'sus4':['1', '4', '5'],}
+            'maj':['1', '3', '5']}
         self.inport = mido.open_input('Arturia KeyStep 32 3')
         self.sample_next_chord()
         self.reset()
@@ -47,8 +42,6 @@ class MidiTeacher(arcade.Window):
                 self.played_notes[msg.note%12] += 1
             if msg.type == 'note_off':
                 self.played_notes[msg.note%12] -= 1
-            if msg.type == 'pitchwheel':
-                self.reset()
 
 
     def sample_next_chord(self):
@@ -71,6 +64,11 @@ class MidiTeacher(arcade.Window):
         """ Checks if user misses or validate a chord """
         if self.is_incorrect() or self.is_correct():
             self.total_chords += 1
+
+            if self.is_correct():
+                arcade.play_sound(self.correct_sound)
+            else:
+                arcade.play_sound(self.wrong_sound)
 
             # Accuracy metrics
             self.total_correct += self.is_correct()
@@ -108,6 +106,8 @@ class MidiTeacher(arcade.Window):
         arcade.set_background_color(arcade.color.BLACK)
         self.t_start = datetime.now()
         self.last_duration = datetime.now()-datetime.now()
+        self.correct_sound = arcade.load_sound("correct.wav")
+        self.wrong_sound = arcade.load_sound("wrong.wav")
 
 
     def on_draw(self):
@@ -176,21 +176,83 @@ class MidiTeacher(arcade.Window):
         elapsed_mins = (datetime.now() - self.t_launch).seconds//60
         elapsed_secs = (datetime.now() - self.t_launch).seconds%60
         elapsed_microsecs = (datetime.now() - self.t_launch).microseconds/10000
-        arcade.draw_text('%02d:%02d:%02d'%(elapsed_mins,elapsed_secs,elapsed_microsecs), SCREEN_WIDTH/2 , SCREEN_HEIGHT*(1-1/10), root_color, 20, anchor_x='center', anchor_y='center', font_name = 'Consolas')  
+        arcade.draw_text('%02d:%02d:%02d'%(elapsed_mins,elapsed_secs,elapsed_microsecs), 
+            SCREEN_WIDTH/2, SCREEN_HEIGHT*(1-1/10), 
+            root_color, 20, 
+            anchor_x='center', anchor_y='center', font_name = 'Consolas')  
+
+        # Shortcuts
+        arcade.draw_text('(Press SPACE to pause)', 
+            SCREEN_WIDTH/2, SCREEN_HEIGHT*(1/10), 
+            root_color, 10, 
+            anchor_x='center', anchor_y='center', font_name = 'Consolas')  
+
+    def on_key_press(self, key, modifiers):
+        """Called whenever a key is pressed. """
+
+        # If the player presses a key, update the speed
+        if key == arcade.key.SPACE:
+            pause_view = PauseScreen(self)
+            self.window.show_view(pause_view)
 
 
     def update(self, delta_time):
         """ Game update """
         self.check_next()
         self.check_midi()
+
+class WelcomeScreen(arcade.View):
+    """ Welcome screen and credits """
+    def on_show(self):
+            """ This is run once when we switch to this view """
+            arcade.set_background_color(arcade.csscolor.BLACK)
+
+    def on_draw(self):
+        """ Draw this view """
+        arcade.start_render()
+        arcade.draw_text("midiTeacher V.0", SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2,
+                         arcade.color.WHITE, font_size=30, anchor_x="center")
+        arcade.draw_text("Click to start.", SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2-75,
+                         arcade.color.WHITE, font_size=20, anchor_x="center")
+
+    def on_mouse_press(self, _x, _y, _button, _modifiers):
+        """ If the user presses the mouse button, start the game. """
+        game_view = GameView()
+        game_view.setup()
+        self.window.show_view(game_view)
+
+
+class PauseScreen(arcade.View):
+    """ Pause view, resumes, resets and quits game """
+    def __init__(self, game_view):
+        super().__init__()
+        self.game_view = game_view
+    def on_show(self):
+            """ This is run once when we switch to this view """
+            arcade.set_background_color(arcade.csscolor.BLACK)
+
+    def on_draw(self):
+        """ Draw this view """
+        arcade.start_render()
+        arcade.draw_text("Paused", SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2,
+                         arcade.color.WHITE, font_size=40, anchor_x="center")
         
+        arcade.draw_text("Press SPACE to resume.\nPress Q to quit.\nPress R to restart.", 
+            SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2-75,
+            arcade.color.WHITE, font_size=15, anchor_x="center")
 
-def main():
-    """ Main loop """
-    game = MidiTeacher(SCREEN_WIDTH, SCREEN_HEIGHT)
-    game.setup()
-    arcade.run()
-
+    def on_key_press(self, key, modifiers):
+        """ Quit or resume game. """
+        if key == arcade.key.SPACE:
+            self.window.show_view(self.game_view)
+        if key == arcade.key.Q:
+            self.window.close()
+        if key == arcade.key.R:
+            self.game_view.reset()
+            self.window.show_view(self.game_view)
 
 if __name__ == "__main__":
-    main()
+    window = arcade.Window(SCREEN_WIDTH, SCREEN_HEIGHT, "midiTeacher")
+    start_view = WelcomeScreen()
+    window.show_view(start_view)
+    arcade.run()
