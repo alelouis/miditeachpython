@@ -5,6 +5,7 @@ import mido
 import arcade
 import random
 import time
+import pickle
 from datetime import datetime
 from PauseView import PauseView
 
@@ -22,9 +23,11 @@ class GameView(arcade.View):
         self.formulas = {
             'min':['1', '3m', '5'],
             'maj':['1', '3', '5']}
-        print(input_select)
+
         self.selected_device = mido.get_input_names()[input_select]
-        
+        self.stats_path = 'stats/' + datetime.now().strftime('%m%d%Y') + '.p'
+        self.stats_file = open(self.stats_path, 'wb')
+
         self.inport = mido.open_input(self.selected_device)
         self.sample_next_chord()
         self.reset()
@@ -56,13 +59,22 @@ class GameView(arcade.View):
         
         # Root
         self.root = random.choice(self.notes)
-        self.root_text = random.choice(self.root.split('\n')) + self.formula_name
+        self.root_select = random.choice(self.root.split('\n'))
+        self.root_text = self.root_select + self.formula_name
 
         # Expected notes
         self.expected_notes = [0]*12
         for interval in self.formula: 
             self.expected_notes[(self.notes.index(self.root) + self.intervals.index(interval))%12] = 1
         
+
+    def get_stat_dict(self):
+        st = {}
+        st['root'] = self.root_select
+        st['formula'] = self.formula_name
+        st['time'] = self.last_duration
+        st['timestamp'] = datetime.now()
+        return st
 
     def check_next(self):
         """ Checks if user misses or validate a chord """
@@ -84,6 +96,9 @@ class GameView(arcade.View):
             self.last_duration = float(str(self.last_duration).split(':')[-1][1:6])
             self.total_duration += self.last_duration
             
+            # Saving stats
+            pickle.dump(self.get_stat_dict(), self.stats_file)
+
             # Next chords
             time.sleep(0.5)
             self.t_start = datetime.now()
@@ -190,6 +205,7 @@ class GameView(arcade.View):
             SCREEN_WIDTH/2, SCREEN_HEIGHT*(1/10), 
             root_color, 10, 
             anchor_x='center', anchor_y='center', font_name = 'Consolas')  
+
 
     def on_key_press(self, key, modifiers):
         """Called whenever a key is pressed. """
