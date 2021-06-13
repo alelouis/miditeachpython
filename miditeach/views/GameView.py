@@ -7,7 +7,8 @@ import random
 import time
 import pickle
 from datetime import datetime
-from views.PauseView import PauseView
+from miditeach.views.PauseView import PauseView
+from pathlib import Path
 
 SCREEN_WIDTH = 1000
 SCREEN_HEIGHT = 500
@@ -24,8 +25,9 @@ class GameView(arcade.View):
             'min':['1', '3m', '5'],
             'maj':['1', '3', '5']}
 
+        self.base_path = str(Path(__file__).absolute().parent.parent)
         self.selected_device = mido.get_input_names()[input_select]
-        self.stats_path = 'stats/' + datetime.now().strftime('%m%d%Y') + '.p'
+        self.stats_path = self.base_path + '/stats/' + datetime.now().strftime('%m%d%Y') + '.p'
         self.stats_file = open(self.stats_path, 'wb')
 
         self.inport = mido.open_input(self.selected_device)
@@ -125,8 +127,8 @@ class GameView(arcade.View):
         arcade.set_background_color(arcade.color.BLACK)
         self.t_start = datetime.now()
         self.last_duration = datetime.now()-datetime.now()
-        self.correct_sound = arcade.load_sound("assets/sounds/correct.wav")
-        self.wrong_sound = arcade.load_sound("assets/sounds/wrong.wav")
+        self.correct_sound = arcade.load_sound(self.base_path + "/assets/sounds/correct.wav")
+        self.wrong_sound = arcade.load_sound(self.base_path + "/assets/sounds/wrong.wav")
 
 
     def on_draw(self):

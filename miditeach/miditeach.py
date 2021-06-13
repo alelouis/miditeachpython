@@ -2,12 +2,12 @@
 # -*- coding: UTF-8 -*-
 
 import arcade
-from views.WelcomeScreen import WelcomeScreen
+from miditeach.views.WelcomeScreen import WelcomeScreen
 
 SCREEN_WIDTH = 1000
 SCREEN_HEIGHT = 500
 
-if __name__ == "__main__":
+def main():
     window = arcade.Window(SCREEN_WIDTH, SCREEN_HEIGHT, "midiTeacher")
     start_view = WelcomeScreen()
     window.show_view(start_view)

@@ -3,7 +3,7 @@
 
 import arcade
 import mido
-from views.GameView import GameView
+from miditeach.views.GameView import GameView
 
 SCREEN_WIDTH = 1000
 SCREEN_HEIGHT = 500
