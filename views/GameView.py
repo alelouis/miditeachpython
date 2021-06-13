@@ -7,7 +7,7 @@ import random
 import time
 import pickle
 from datetime import datetime
-from PauseView import PauseView
+from views.PauseView import PauseView
 
 SCREEN_WIDTH = 1000
 SCREEN_HEIGHT = 500

@@ -3,7 +3,7 @@
 
 import arcade
 import mido
-from GameView import GameView
+from views.GameView import GameView
 
 SCREEN_WIDTH = 1000
 SCREEN_HEIGHT = 500

@@ -2,7 +2,7 @@
 # -*- coding: UTF-8 -*-
 
 import arcade
-from WelcomeScreen import WelcomeScreen
+from views.WelcomeScreen import WelcomeScreen
 
 SCREEN_WIDTH = 1000
 SCREEN_HEIGHT = 500
