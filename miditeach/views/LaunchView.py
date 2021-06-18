@@ -2,9 +2,10 @@
 # -*- coding: UTF-8 -*-
 
 import arcade
-from arcade.gui import UIManager
-from arcade.gui.ui_style import UIStyle
 import mido
+import poetry_version
+
+from arcade.gui import UIManager
 from miditeach.views.GameView import GameView
 from pathlib import Path
 
@@ -21,14 +22,14 @@ class Selector(arcade.gui.UIImageToggle):
     def on_click(self):
         self.value = not self.value
 
-
-class WelcomeScreen(arcade.View):
+class LaunchView(arcade.View):
     """ Welcome screen and credits """
 
     def __init__(self):
         super().__init__()
         self.input_select = 0
         self.ui_manager = UIManager()
+        self.version = poetry_version.extract(source_file=__file__)
 
     def on_show(self):
         """ This is run once when we switch to this view """
@@ -54,7 +55,7 @@ class WelcomeScreen(arcade.View):
     def on_draw(self):
         """ Draw this view """
         arcade.start_render()
-        arcade.draw_text("midiTeacher V0.5", SCREEN_WIDTH / 2, SCREEN_HEIGHT * (1-1/4),
+        arcade.draw_text(f"midiTeacher V{self.version}", SCREEN_WIDTH / 2, SCREEN_HEIGHT * (1-1/4),
                          arcade.color.WHITE, font_size=30, anchor_x="center")
         arcade.draw_text("Alexis LOUIS - github.com/alelouis", SCREEN_WIDTH-15, 15,
                          arcade.color.WHITE, font_size=15, anchor_x="right")
@@ -68,10 +69,10 @@ class WelcomeScreen(arcade.View):
             color = arcade.color.GREEN if e == self.input_select else arcade.color.WHITE
             arcade.draw_text(f'({e+1}) '+ i, SCREEN_WIDTH / 2 - SCREEN_WIDTH/8, SCREEN_HEIGHT * (1-1/4) - (e+5)*20,
                          color, font_size=18, anchor_x="left")
-
-        
+   
     def on_show_view(self):
         """ Show this view """
+
         self.setup()
 
     def on_key_press(self, key, modifiers):
@@ -83,6 +84,9 @@ class WelcomeScreen(arcade.View):
             self.input_select -= 1
             self.input_select = max(self.input_select, 0)
         if key == arcade.key.RETURN:
-            game_view = GameView(input_select = self.input_select, chords_selected = self.get_selector_status())
+            game_view = GameView(
+                input_select = self.input_select, 
+                chords_selected = self.get_selector_status(),
+                launch_view=self)
             game_view.setup()
             self.window.show_view(game_view)

@@ -7,7 +7,7 @@ import random
 import time
 import pickle
 from datetime import datetime
-from miditeach.views.PauseView import PauseView
+from miditeach.views.StopView import StopView
 from pathlib import Path
 
 SCREEN_WIDTH = 1000
@@ -16,7 +16,7 @@ SCREEN_HEIGHT = 500
 class GameView(arcade.View):
     """ Main application class. """
 
-    def __init__(self, input_select, chords_selected):
+    def __init__(self, input_select, chords_selected, launch_view):
         super().__init__()
         self.played_notes = [0]*12
         self.notes = ['C', 'C#\nDb', 'D', 'D#\nEb', 'E', 'F', 'F#\nGb', 'G', 'G#\nAb', 'A', 'A#\nBb', 'B']
@@ -39,7 +39,11 @@ class GameView(arcade.View):
         self.inport = mido.open_input(self.selected_device)
         self.sample_next_chord()
         self.reset()
+        self.launch_view = launch_view
 
+    def close_port(self):
+        self.inport.close()
+        print(self.inport)
 
     def reset(self):
         """ Reset time and accuracy metrics """
@@ -49,7 +53,6 @@ class GameView(arcade.View):
         self.total_incorrect = 0
         self.t_launch = datetime.now()
 
-
     def check_midi(self):
         """ Checks incoming midi data """
         for msg in self.inport.iter_pending(): 
@@ -57,7 +60,6 @@ class GameView(arcade.View):
                 self.played_notes[msg.note%12] += 1
             if msg.type == 'note_off':
                 self.played_notes[msg.note%12] -= 1
-
 
     def sample_next_chord(self):
         """ Sample a new root and formula """
@@ -75,7 +77,6 @@ class GameView(arcade.View):
         for interval in self.formula: 
             self.expected_notes[(self.notes.index(self.root) + self.intervals.index(interval))%12] = 1
         
-
     def get_stat_dict(self):
         st = {}
         st['root'] = self.root_select
@@ -112,7 +113,6 @@ class GameView(arcade.View):
             self.t_start = datetime.now()
             self.sample_next_chord()
 
-
     def is_incorrect(self):
         """ Checks if user inputs a wrong note """
         correct_notes = sum([a and b for a,b in zip(self.expected_notes, self.played_notes)])
@@ -120,22 +120,19 @@ class GameView(arcade.View):
         is_incorrect = incorrect_notes > 0
         return is_incorrect
 
-
     def is_correct(self):
         """ Checks if user inputs a correct chord """
         correct_notes = sum([a and b for a,b in zip(self.expected_notes, self.played_notes)])
         is_correct = correct_notes == len(self.formula)
         return is_correct
 
-
     def setup(self):
         """ Setup called before app run """
         arcade.set_background_color(arcade.color.BLACK)
         self.t_start = datetime.now()
-        self.last_duration = datetime.now()-datetime.now()
+        self.last_duration = datetime.now() - datetime.now()
         self.correct_sound = arcade.load_sound(self.base_path + "/assets/sounds/correct.wav")
         self.wrong_sound = arcade.load_sound(self.base_path + "/assets/sounds/wrong.wav")
-
 
     def on_draw(self):
         """ Render the screen """
@@ -214,15 +211,12 @@ class GameView(arcade.View):
             root_color, 10, 
             anchor_x='center', anchor_y='center', font_name = 'Consolas')  
 
-
     def on_key_press(self, key, modifiers):
         """Called whenever a key is pressed. """
-
-        # If the player presses a key, update the speed
         if key == arcade.key.SPACE:
-            pause_view = PauseView(self)
+            self.launch_view.__init__()
+            pause_view = StopView(self, self.launch_view)
             self.window.show_view(pause_view)
-
 
     def update(self, delta_time):
         """ Game update """
