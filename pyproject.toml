@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "miditeach"
+version = "0.6"
+description = ""
+authors = ["Alexis LOUIS <alelouis.dev@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+arcade = "^2.5.7"
+mido = "^1.2.10"
+python-rtmidi = "^1.4.9"
+
+[tool.poetry.dev-dependencies]
+pytest = "^5.2"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+miditeach = "miditeach.miditeach:main"
