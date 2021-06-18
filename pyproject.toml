@@ -10,6 +10,8 @@ arcade = "^2.5.7"
 mido = "^1.2.10"
 python-rtmidi = "^1.4.9"
 poetry-version = "^0.1.5"
+pyinstaller = "^4.3"
+pygame = "^2.0.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"

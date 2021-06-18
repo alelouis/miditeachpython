@@ -3,20 +3,22 @@
 
 import arcade
 import mido
+import mido.backends.pygame # for bundle
 import poetry_version
 
 from arcade.gui import UIManager
 from miditeach.views.GameView import GameView
 from pathlib import Path
 
+mido.set_backend('mido.backends.pygame')
+
 SCREEN_WIDTH = 1000
 SCREEN_HEIGHT = 500
 
 class Selector(arcade.gui.UIImageToggle):
     def __init__(self, center_x, center_y):
-        self.base_path = str(Path(__file__).absolute().parent.parent)
-        select_off = arcade.load_texture(self.base_path + "/assets/images/select_off.png")
-        select_on = arcade.load_texture(self.base_path + "/assets/images/select_on.png")
+        select_off = arcade.load_texture("assets/images/select_off.png")
+        select_on = arcade.load_texture("assets/images/select_on.png")
         super().__init__(center_x=center_x, center_y=center_y, true_texture=select_on, false_texture=select_off)
     
     def on_click(self):

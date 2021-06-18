@@ -2,13 +2,13 @@
 # -*- coding: UTF-8 -*-
 
 import mido
+import mido.backends.pygame # for bundle
 import arcade
 import random
 import time
-import pickle
 from datetime import datetime
 from miditeach.views.StopView import StopView
-from pathlib import Path
+
 
 SCREEN_WIDTH = 1000
 SCREEN_HEIGHT = 500
@@ -29,13 +29,8 @@ class GameView(arcade.View):
             'm7':['1', '3m', '5', '7m'],
             'M7':['1', '3', '5', '7'],
             '7':['1', '3', '5', '7m']}
-
-        self.formulas = {k:self.all_formulas[k] for k in chords_selected}
-        self.base_path = str(Path(__file__).absolute().parent.parent)
+        self.formulas = {k:self.all_formulas[k] for k in chords_selected if chords_selected[k]}
         self.selected_device = mido.get_input_names()[input_select]
-        self.stats_path = self.base_path + '/stats/' + datetime.now().strftime('%m%d%Y') + '.p'
-        self.stats_file = open(self.stats_path, 'wb')
-
         self.inport = mido.open_input(self.selected_device)
         self.sample_next_chord()
         self.reset()
@@ -104,9 +99,6 @@ class GameView(arcade.View):
             self.last_duration = self.t_end - self.t_start
             self.last_duration = float(str(self.last_duration).split(':')[-1][1:6])
             self.total_duration += self.last_duration
-            
-            # Saving stats
-            pickle.dump(self.get_stat_dict(), self.stats_file)
 
             # Next chords
             time.sleep(0.5)
@@ -131,8 +123,8 @@ class GameView(arcade.View):
         arcade.set_background_color(arcade.color.BLACK)
         self.t_start = datetime.now()
         self.last_duration = datetime.now() - datetime.now()
-        self.correct_sound = arcade.load_sound(self.base_path + "/assets/sounds/correct.wav")
-        self.wrong_sound = arcade.load_sound(self.base_path + "/assets/sounds/wrong.wav")
+        self.correct_sound = arcade.load_sound("assets/sounds/correct.wav")
+        self.wrong_sound = arcade.load_sound("assets/sounds/wrong.wav")
 
     def on_draw(self):
         """ Render the screen """

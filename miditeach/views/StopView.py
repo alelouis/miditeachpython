@@ -29,7 +29,6 @@ class StopView(arcade.View):
         """ Quit or resume game. """
         if key == arcade.key.Q:
             self.window.close()
-            self.game_view.stats_file.close()
         if key == arcade.key.M:
             self.game_view.close_port()
             self.window.show_view(self.launch_view)
