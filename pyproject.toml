@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "miditeach"
 version = "0.6"
-description = ""
+description = "midiTeach is a music learning tool that can be used to practice your chords skills with a midi keyboard 🎹 !"
 authors = ["Alexis LOUIS <alelouis.dev@gmail.com>"]
 
 [tool.poetry.dependencies]
