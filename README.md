@@ -1,5 +1,5 @@
-# midiTeach
-**midiTeach** is a music learning tool that can be used to practice your chords skills with a midi keyboard 🎹 !
+# miditeach
+**miditeach** is a music learning tool that can be used to practice your chords skills with a midi keyboard 🎹 !
 
 ## Features
 - Midi keyboard input selection
@@ -18,7 +18,7 @@ miditeach
 ```
 
 ## Contribute
-**midiTeach** is based on [Arcade](https://github.com/python-poetry/poetry) library and packaged/published using [Poetry](https://github.com/python-poetry/poetry).  
+**miditeach** is based on [Arcade](https://github.com/python-poetry/poetry) library and packaged/published using [Poetry](https://github.com/python-poetry/poetry).  
 
 With [Poetry](https://github.com/python-poetry/poetry) installed, type `poetry install` to gather dependencies and `poetry run miditeach` in order to launch main script.
 
